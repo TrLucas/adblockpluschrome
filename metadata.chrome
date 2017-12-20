@@ -171,6 +171,7 @@ adblockplusui/locale/*/updates.json = *
 
 [ci_templates]
 .travis.yml.tmpl = .travis.yml
+.gitlab-ci.yml.tmpl = .gitlab-ci.yml
 
 [ci_config]
 on_branch = ci
