@@ -30,7 +30,6 @@ jobs:
       if: branch=ci
       script:
         - pip install --user tox
-        - ls -la
         - python ensure_dependencies.py
         - ./runtests
     - stage: build

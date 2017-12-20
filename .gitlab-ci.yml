@@ -1,0 +1,104 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+
+stages:
+  - test
+  - build
+  - deploy
+
+cache:
+  key: cache_$CI_COMMIT_SHA
+  paths:
+  - ./
+
+before_script:
+  - sudo apt-get update -qq && sudo apt-get install -y -qq python-pip
+  - which npm || (curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash ; sudo apt-get install -y nodejs)
+  - pip install --user -r build_requirements.txt
+
+    # npmtests:
+    #   stage: test
+    #   script:
+    #     - python ensure_dependencies.py
+    #     - ./runtests
+    #   cache:
+    #     policy: push
+
+# reusable template for build jobs
+
+.build_template: &create_build
+  stage: build
+  script:
+    - python build.py build -t $TARGET
+  artifacts:
+    expire_in: 3 days
+    paths:
+      - ./*.xpi
+      - ./*.zip
+      - ./*.appx
+  cache:
+    policy: pull
+
+# reusable template for deploy jobs
+
+.deploy_template: &deploy_build
+  stage: deploy
+  script:
+    - python build.py upload -t $TARGET
+  cache: {}
+  environment:
+    name: devbuilds
+
+# actual build jobs
+
+build-nightly:gecko:
+  variables:
+    TARGET: gecko
+  <<: *create_build
+  only:
+    - ci
+
+build-nightly:chrome:
+  variables:
+    TARGET: chrome
+  <<: *create_build
+  only:
+    - master
+
+build-nightly:edge:
+  variables:
+    TARGET: edge
+  <<: *create_build
+  only:
+    - master
+
+# actual deploy jobs
+
+deploy-nightly:gecko:
+  variables:
+    TARGET: gecko
+  <<: *deploy_build
+  dependencies:
+    - build-nightly:gecko
+  only:
+    - ci
+
+deploy-nightly:chrome:
+  variables:
+    TARGET: chrome
+  <<: *deploy_build
+  dependencies:
+    - build-nightly:chrome
+  only:
+    - master
+
+deploy-nightly:edge:
+  variables:
+    TARGET: edge
+  <<: *deploy_build
+  dependencies:
+    - build-nightly:edge
+  only:
+    - master
