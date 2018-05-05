@@ -1,0 +1,19 @@
+#!/bin/bash
+if [ -d "adblockpluscore" ]; then
+    cd adblockpluscore
+    npm install
+    if npm test ; then
+        cd ..
+    else
+        exit 1
+    fi
+fi
+
+if [ -d "buildtools" ]; then
+    cd buildtools
+    if tox ; then
+        cd ..
+    else
+        exit 2
+    fi
+fi

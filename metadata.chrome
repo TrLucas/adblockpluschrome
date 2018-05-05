@@ -168,3 +168,9 @@ adblockplusui/locale/*/desktop-options.json = *
 adblockplusui/locale/*/firstRun.json = *
 adblockplusui/locale/*/issue-reporter.json = *
 adblockplusui/locale/*/updates.json = *
+
+[ci_templates]
+.travis.yml.tmpl = .travis.yml
+
+[ci_config]
+on_branch = ci
