@@ -1,0 +1,47 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+language: node_js
+node_js:
+  - "7"
+
+notifications:
+  email:
+    recipients:
+      - t.lucas@eyeo.com
+    on_success: never
+    on_failure: always
+
+install:
+    - pip install --user -r build_requirements.txt
+
+
+
+stages:
+  - test
+  - build
+  - deploy
+  - download
+
+jobs:
+  include:
+    - stage: test
+      if: branch=ci
+      script:
+        - pip install --user tox
+        - ls -la
+        - python ensure_dependencies.py
+        - ./runtests
+    - stage: build
+      if: branch=ci
+      script: python build.py build -t $TARGET
+      env: TARGET=chrome
+    - stage: build
+      if: branch=ci
+      script: python build.py build -t $TARGET
+      env: TARGET=gecko
+    - stage: build
+      if: branch=ci
+      script: python build.py build -t $TARGET
+      env: TARGET=edge
