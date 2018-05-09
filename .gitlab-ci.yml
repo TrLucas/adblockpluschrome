@@ -24,7 +24,10 @@ npmtests:
      - python ensure_dependencies.py
      - ./runtests
    cache:
-     policy: push
+    key: cache_$CI_COMMIT_SHA
+    paths:
+      - ./
+    policy: push
 
 # reusable template for build jobs
 
