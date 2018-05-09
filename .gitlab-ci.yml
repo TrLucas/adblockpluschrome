@@ -18,13 +18,13 @@ before_script:
   - which npm || (curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash ; sudo apt-get install -y nodejs)
   - pip install --user -r build_requirements.txt
 
-    # npmtests:
-    #   stage: test
-    #   script:
-    #     - python ensure_dependencies.py
-    #     - ./runtests
-    #   cache:
-    #     policy: push
+npmtests:
+   stage: test
+   script:
+     - python ensure_dependencies.py
+     - ./runtests
+   cache:
+     policy: push
 
 # reusable template for build jobs
 
@@ -39,6 +39,9 @@ before_script:
       - ./*.zip
       - ./*.appx
   cache:
+    key: cache_$CI_COMMIT_SHA
+    paths:
+      - ./
     policy: pull
 
 # reusable template for deploy jobs
@@ -47,7 +50,11 @@ before_script:
   stage: deploy
   script:
     - python build.py upload -t $TARGET
-  cache: {}
+  cache:
+    key: cache_$CI_COMMIT_SHA
+    paths:
+      - ./
+    policy: pull
   environment:
     name: devbuilds
 
