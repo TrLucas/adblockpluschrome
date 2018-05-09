@@ -4,30 +4,35 @@
 
 
 stages:
+  - install
   - test
   - build
   - deploy
 
-cache:
-  key: cache_$CI_COMMIT_SHA
-  paths:
-  - ./
-
-before_script:
-  - sudo apt-get update -qq && sudo apt-get install -y -qq python-pip
-  - which npm || (curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash ; sudo apt-get install -y nodejs)
-  - pip install --user -r build_requirements.txt
+prepare-dependencies:
+  stage: install
+  script:
+    - sudo apt-get update -qq && sudo apt-get install -y -qq python-pip
+    - which npm || (curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash ; sudo apt-get install -y nodejs)
+    - sudo pip install -r build_requirements.txt
+    - python ensure_dependencies.py
+  cache:
+    key: cache_$CI_COMMIT_SHA
+    paths:
+      - ./
+    policy: push
 
 npmtests:
    stage: test
    script:
+     # in case caching fails
      - python ensure_dependencies.py
      - ./runtests
    cache:
     key: cache_$CI_COMMIT_SHA
     paths:
       - ./
-    policy: push
+    policy: pull
 
 # reusable template for build jobs
 
