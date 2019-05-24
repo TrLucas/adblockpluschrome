@@ -64,6 +64,7 @@ for (let backend of glob.sync("./test/browsers/*.js"))
 
       before(function()
       {
+        this.description = description;
         if (!devenvCreated)
           devenvCreated = new Promise((resolve, reject) =>
           {

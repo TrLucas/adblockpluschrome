@@ -70,7 +70,7 @@ function takeScreenshot(element)
 
       return element.getDriver().takeScreenshot()
         .then(s => Jimp.read(Buffer.from(s, "base64")))
-        .then(img => img.crop(x, y, rect.width, rect.height).bitmap);
+        .then(img => img.crop(x, y, rect.width, rect.height));
     })
   );
   return lastScreenshot;
@@ -213,10 +213,26 @@ it("Test pages", function()
               getSections(this.driver).then(sections =>
                 this.driver.wait(() =>
                   takeScreenshot(sections[i][1]).then(screenshot =>
-                    screenshot.width == expectedScreenshot.width &&
-                    screenshot.height == expectedScreenshot.height &&
-                    screenshot.data.compare(expectedScreenshot.data) == 0
-                  ), 1000
+                  {
+                    let bitmap = screenshot.bitmap;
+                    let expectedBitmap = expectedScreenshot.bitmap;
+                    if (bitmap.width != expectedBitmap.width ||
+                        bitmap.height != expectedBitmap.height ||
+                        bitmap.data.compare(expectedBitmap.data) != 0)
+                    {
+                      let vTitle = title.replace(/[\W]+/g, "").toLowerCase();
+                      for (let [postfix, data] of [
+                        ["gotten", screenshot],
+                        ["expected", expectedScreenshot]
+                      ])
+                      {
+                        data.write(`test/screenshots/${this.description}` +
+                                   `_${vTitle}_${postfix}.png`);
+                      }
+                      return 0;
+                    }
+                    return 1;
+                  }), 1000
                 ).catch(e =>
                 {
                   if (e instanceof TimeoutError)
